@@ -2,47 +2,86 @@ import java.util.*;
 
 public class Graph {
     int size, edges;
-    PriorityQueue<Node>[] vertices;
+    HashMap<Integer, Node> vertices;
 
     public Graph(int numVert){
         size = numVert;
         edges = 0;
-        vertices = new PriorityQueue[numVert];
-        for (int i = 0; i < size; i++){
-            vertices[i] = new PriorityQueue<>();
-        }
+        vertices = new HashMap<>();
     }
 
     public void addEdge(int first, int second, int weight){
-        vertices[first].add(new Node(second, weight));
-        vertices[second].add(new Node(first, weight));
-        edges++;
-    }
-
-    public String toString(){
-        String output = "";
-        for (int i = 0; i < size; i++){
-            output += vertices[i] + "\n";
+        if (vertices.get(first) == null){
+            vertices.put(first, new Node(first));
         }
-        return output;
+
+        if (vertices.get(second) == null){
+            vertices.put(second, new Node(second));
+        }
+
+        Edge edge = new Edge(vertices.get(first), vertices.get(second), weight);
+        vertices.get(first).edges.add(edge);
+        vertices.get(second).edges.add(edge);
     }
 
-    public class Node implements Comparable<Node>{
+    public int minSpanTreeWeight(){
+        int length = 0;
+        HashSet<Node> visited = new HashSet<>();
+        PriorityQueue<Edge> edges = new PriorityQueue<>();
+
+        Node current = vertices.get(0);
+        while (visited.size() <  vertices.size()){
+            visited.add(current);
+
+            for (Edge e : current.edges){
+                edges.add(e);
+            }
+
+            Edge shortest = edges.poll();
+            while (shortest != null && visited.contains(shortest.a) && visited.contains(shortest.b)){
+                shortest = edges.poll();
+            }
+
+            if (shortest == null){
+                break;
+            }
+
+            if (visited.contains(shortest.a)){
+                current = shortest.b;
+            } else {
+                current = shortest.a;
+            }
+            length += shortest.weight;
+        }
+
+        return length;
+    }
+
+    public class Node {
         int value;
-        int weight;
+        PriorityQueue<Edge> edges;
 
-        public Node(int v, int w){
+        public Node(int v){
             value = v;
-            weight = w;
-        }
-
-        public int compareTo(Node other){
-            return Integer.compare(this.weight, other.weight);
+            edges = new PriorityQueue<>();
         }
 
         public String toString(){
-            String output = "<" + value + "," + weight + ">";
-            return output;
+            return Integer.toString(value);
+        }
+    }
+
+    public class Edge implements Comparable<Edge>{
+        Node a, b;
+        int weight;
+        public Edge(Node a, Node b, int w){
+            this.a = a;
+            this.b = b;
+            weight = w;
+        }
+
+        public int compareTo(Edge other){
+            return Integer.compare(this.weight, other.weight);
         }
     }
 }

@@ -27,7 +27,7 @@ public class Main {
 
                 graph.addEdge(streetCodes.get(first), streetCodes.get(second), weight);
             }
-            System.out.println(graph);
+            System.out.println(graph.minSpanTreeWeight());
         }
     }
 }
